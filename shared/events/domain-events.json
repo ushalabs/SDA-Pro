@@ -1,0 +1,20 @@
+{
+  "events": [
+    "AlertIngested",
+    "AlertEnriched",
+    "IncidentCreated",
+    "IncidentStateChanged",
+    "ResponseActionExecuted",
+    "ThreatIntelUpdated",
+    "NotificationDispatched",
+    "AuditLogCreated"
+  ],
+  "envelope": {
+    "eventId": "uuid",
+    "eventType": "string",
+    "occurredAt": "timestamp",
+    "publisher": "service",
+    "correlationId": "uuid",
+    "payload": {}
+  }
+}

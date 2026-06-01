@@ -1,0 +1,16 @@
+﻿C:\Users\HP\Desktop\SDA Project\services\alert-ingestion-service\src\main\java\edu\sdapro\domain\alert\AlertComponent.java:7: // PATTERN: Composite
+C:\Users\HP\Desktop\SDA Project\services\alert-ingestion-service\src\main\java\edu\sdapro\domain\incident\IncidentState.java:5: // PATTERN: State
+C:\Users\HP\Desktop\SDA Project\services\alert-ingestion-service\src\main\java\edu\sdapro\enrichment\EnrichmentHandler.java:7: // PATTERN: Chain of Responsibility
+C:\Users\HP\Desktop\SDA Project\services\alert-ingestion-service\src\main\java\edu\sdapro\enrichment\EnrichmentProviderFactory.java:3: // PATTERN: Abstract Factory
+C:\Users\HP\Desktop\SDA Project\services\alert-ingestion-service\src\main\java\edu\sdapro\events\EventBusPublisher.java:13: // PATTERN: Observer
+C:\Users\HP\Desktop\SDA Project\services\alert-ingestion-service\src\main\java\edu\sdapro\events\EventBusPublisher.java:15: // PATTERN: Singleton
+C:\Users\HP\Desktop\SDA Project\services\alert-ingestion-service\src\main\java\edu\sdapro\ingestion\AlertNormalizerFactory.java:5: // PATTERN: Factory Method
+C:\Users\HP\Desktop\SDA Project\services\alert-ingestion-service\src\main\java\edu\sdapro\ingestion\IngestionConfigManager.java:5: // PATTERN: Singleton
+C:\Users\HP\Desktop\SDA Project\services\alert-ingestion-service\src\main\java\edu\sdapro\notification\NotificationFactory.java:3: // PATTERN: Abstract Factory
+C:\Users\HP\Desktop\SDA Project\services\alert-ingestion-service\src\main\java\edu\sdapro\response\Decorators.java:3: // PATTERN: Decorator
+C:\Users\HP\Desktop\SDA Project\services\alert-ingestion-service\src\main\java\edu\sdapro\response\IncidentResponseFacade.java:11: // PATTERN: Facade
+C:\Users\HP\Desktop\SDA Project\services\alert-ingestion-service\src\main\java\edu\sdapro\response\ResponseActionFactory.java:3: // PATTERN: Factory Method
+C:\Users\HP\Desktop\SDA Project\services\alert-ingestion-service\src\main\java\edu\sdapro\response\ResponseActionProxy.java:3: // PATTERN: Proxy
+C:\Users\HP\Desktop\SDA Project\services\alert-ingestion-service\src\main\java\edu\sdapro\response\ResponseStrategy.java:6: // PATTERN: Strategy
+C:\Users\HP\Desktop\SDA Project\services\alert-ingestion-service\src\main\java\edu\sdapro\threat\ThreatAdapters.java:3: // PATTERN: Adapter
+C:\Users\HP\Desktop\SDA Project\services\alert-ingestion-service\src\main\java\edu\sdapro\threat\ThreatIntelProxy.java:6: // PATTERN: Proxy

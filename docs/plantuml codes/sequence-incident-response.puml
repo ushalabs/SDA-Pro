@@ -1,0 +1,23 @@
+@startuml
+title Incident Response Orchestration Flow
+actor Analyst
+participant Dashboard
+participant "IncidentResponseFacade\nFacade" as F
+participant "ResponseStrategySelector\nStrategy" as S
+participant "ResponseActionFactory\nFactory Method" as AF
+participant "Decorators\nAudit + Approval + Rollback" as D
+participant "ResponseActionProxy\nProxy" as P
+participant "Mock Firewall/EDR" as EXT
+participant "EventBusPublisher\nObserver" as E
+Analyst -> Dashboard : Execute response
+Dashboard -> F : POST /incidents/{id}/respond
+F -> S : select(incident)
+S --> F : AggressiveContainmentStrategy
+F -> AF : create BLOCK_IP
+AF --> F : BlockIpAction
+F -> D : wrap action
+D -> P : execute target
+P -> EXT : mock command
+F -> E : publish ResponseActionExecuted
+Dashboard <-- E : SSE update
+@enduml

@@ -1,0 +1,445 @@
+openapi: 3.0.3
+info:
+  title: SDA-Pro REST API
+  version: 0.1.0
+  description: REST API contract for the SDA-Pro semester project demo.
+servers:
+  - url: http://localhost:8080
+paths:
+  /auth/login:
+    post:
+      summary: Login analyst
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Mock authentication response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+  /identity/me:
+    get:
+      summary: Current analyst profile
+      responses:
+        "200":
+          description: Analyst profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Analyst"
+  /ingest/webhook/{sourceType}:
+    post:
+      summary: Ingest push alert webhook
+      parameters:
+        - in: path
+          name: sourceType
+          required: true
+          schema:
+            type: string
+            example: splunk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AlertPayload"
+      responses:
+        "200":
+          description: Alert ingested, enriched, and correlated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DemoFlowResponse"
+  /ingest/poll/{sourceId}:
+    post:
+      summary: Simulate pull-mode ingestion
+      parameters:
+        - in: path
+          name: sourceId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Polled alert processed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DemoFlowResponse"
+  /alerts:
+    get:
+      summary: List alerts
+      responses:
+        "200":
+          description: Alert list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Alert"
+  /alerts/{id}:
+    get:
+      summary: Get alert by ID
+      parameters:
+        - $ref: "#/components/parameters/UuidPath"
+      responses:
+        "200":
+          description: Alert
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Alert"
+  /enrichment/process:
+    post:
+      summary: Process alert through enrichment and correlation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AlertPayload"
+      responses:
+        "200":
+          description: Enriched alert and incident result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DemoFlowResponse"
+  /incidents:
+    get:
+      summary: List incidents
+      responses:
+        "200":
+          description: Incident list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Incident"
+    post:
+      summary: Create incident through demo pipeline
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AlertPayload"
+      responses:
+        "200":
+          description: Incident created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DemoFlowResponse"
+  /incidents/{id}:
+    get:
+      summary: Get incident by ID
+      parameters:
+        - $ref: "#/components/parameters/UuidPath"
+      responses:
+        "200":
+          description: Incident
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Incident"
+  /incidents/{id}/state:
+    patch:
+      summary: Transition incident state
+      parameters:
+        - $ref: "#/components/parameters/UuidPath"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StateTransitionRequest"
+      responses:
+        "200":
+          description: Updated incident
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Incident"
+  /incidents/{id}/respond:
+    post:
+      summary: Execute response plan
+      parameters:
+        - $ref: "#/components/parameters/UuidPath"
+      responses:
+        "200":
+          description: Response result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResponsePlanResult"
+  /incidents/{id}/actions:
+    post:
+      summary: Execute manual response action
+      parameters:
+        - $ref: "#/components/parameters/UuidPath"
+      responses:
+        "200":
+          description: Response result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResponsePlanResult"
+  /threat-intel/reputation:
+    post:
+      summary: Check indicator reputation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReputationRequest"
+      responses:
+        "200":
+          description: Reputation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReputationResult"
+  /notifications/dispatch:
+    post:
+      summary: Dispatch mock notification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NotificationRequest"
+      responses:
+        "200":
+          description: Notification dispatch status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: SENT
+                  mock:
+                    type: boolean
+                    example: true
+  /audit/events:
+    get:
+      summary: List audit events
+      responses:
+        "200":
+          description: Audit event list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuditEvent"
+  /dashboard/metrics:
+    get:
+      summary: Dashboard metrics
+      responses:
+        "200":
+          description: SOC metrics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardMetrics"
+  /dashboard/events:
+    get:
+      summary: Server-Sent Event stream
+      responses:
+        "200":
+          description: SSE stream of domain events
+          content:
+            text/event-stream:
+              schema:
+                type: string
+components:
+  parameters:
+    UuidPath:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          example: analyst@sda-pro.local
+        password:
+          type: string
+          example: password
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: mock-jwt-token
+        email:
+          type: string
+        role:
+          type: string
+          example: TIER_2
+    Analyst:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+    AlertPayload:
+      type: object
+      properties:
+        srcIp:
+          type: string
+          example: 203.0.113.10
+        destHost:
+          type: string
+          example: finance-db
+        signature:
+          type: string
+          example: lateral-movement
+        severity:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, CRITICAL]
+    DemoFlowResponse:
+      type: object
+      properties:
+        alertId:
+          type: string
+          format: uuid
+        incidentId:
+          type: string
+          format: uuid
+        campaign:
+          type: string
+        enrichment:
+          type: object
+    Alert:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        external_alert_id:
+          type: string
+        severity:
+          type: string
+        status:
+          type: string
+        normalized_payload_json:
+          type: string
+        created_at:
+          type: string
+    Incident:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        severity:
+          type: string
+        current_state:
+          type: string
+        affected_asset:
+          type: string
+        created_at:
+          type: string
+    StateTransitionRequest:
+      type: object
+      properties:
+        action:
+          type: string
+          example: begin_triage
+        reason:
+          type: string
+          example: analyst triage
+    ResponsePlanResult:
+      type: object
+      properties:
+        incidentId:
+          type: string
+          format: uuid
+        strategy:
+          type: string
+        outcomes:
+          type: array
+          items:
+            type: object
+    ReputationRequest:
+      type: object
+      properties:
+        indicator:
+          type: string
+          example: 203.0.113.10
+        type:
+          type: string
+          example: IP
+    ReputationResult:
+      type: object
+      properties:
+        indicator:
+          type: string
+        score:
+          type: integer
+        verdict:
+          type: string
+        provider:
+          type: string
+    NotificationRequest:
+      type: object
+      properties:
+        channel:
+          type: string
+          example: SLACK
+        recipient:
+          type: string
+          example: "#soc-war-room"
+        message:
+          type: string
+    AuditEvent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        event_type:
+          type: string
+        actor_id:
+          type: string
+        entity_type:
+          type: string
+        entity_id:
+          type: string
+        payload_json:
+          type: string
+        created_at:
+          type: string
+    DashboardMetrics:
+      type: object
+      properties:
+        alerts:
+          type: integer
+        incidents:
+          type: integer
+        openIncidents:
+          type: integer
+        mttd:
+          type: string
+        mttr:
+          type: string

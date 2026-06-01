@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: alert-ingestion-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/sdapro}
+    username: ${SPRING_DATASOURCE_USERNAME:sdapro}
+    password: ${SPRING_DATASOURCE_PASSWORD:sdapro}
+  sql:
+    init:
+      mode: always
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+server:
+  port: 8080

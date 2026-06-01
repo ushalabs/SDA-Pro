@@ -1,0 +1,212 @@
+@startuml SDAPro_Clean_Class_Diagram
+
+!theme plain
+title SDA-Pro — Clean Class Diagram Showing All 12 Design Patterns
+
+skinparam packageStyle rectangle
+skinparam shadowing true
+skinparam roundcorner 12
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+hide empty members
+
+package "Alert Domain\n<<Composite Pattern>>" {
+    interface AlertComponent
+    class SingleAlert
+    class AlertCampaign
+    class IncidentCluster
+
+    AlertComponent <|.. SingleAlert
+    AlertComponent <|.. AlertCampaign
+    AlertComponent <|.. IncidentCluster
+
+    AlertCampaign o-- AlertComponent : contains
+    IncidentCluster o-- AlertComponent : contains
+}
+
+package "Alert Ingestion\n<<Singleton + Factory Method>>" {
+    class IngestionConfigManager <<Singleton>>
+    interface AlertNormalizer
+    class AlertNormalizerFactory <<Factory Method>>
+    class SplunkNormalizer
+    class FirewallNormalizer
+    class CrowdStrikeNormalizer
+    class CloudSIEMNormalizer
+
+    AlertNormalizerFactory ..> AlertNormalizer : creates
+
+    AlertNormalizer <|.. SplunkNormalizer
+    AlertNormalizer <|.. FirewallNormalizer
+    AlertNormalizer <|.. CrowdStrikeNormalizer
+    AlertNormalizer <|.. CloudSIEMNormalizer
+}
+
+package "Enrichment Pipeline\n<<Chain of Responsibility + Abstract Factory>>" {
+    abstract class EnrichmentHandler
+    class DeduplicationHandler
+    class GeoIPHandler
+    class ThreatIntelHandler
+    class AssetContextHandler
+    class ClassificationHandler
+
+    interface EnrichmentProviderFactory <<Abstract Factory>>
+    class StandardEnrichmentFactory
+    class PremiumEnrichmentFactory
+
+    EnrichmentHandler <|-- DeduplicationHandler
+    EnrichmentHandler <|-- GeoIPHandler
+    EnrichmentHandler <|-- ThreatIntelHandler
+    EnrichmentHandler <|-- AssetContextHandler
+    EnrichmentHandler <|-- ClassificationHandler
+
+    DeduplicationHandler --> GeoIPHandler : next
+    GeoIPHandler --> ThreatIntelHandler : next
+    ThreatIntelHandler --> AssetContextHandler : next
+    AssetContextHandler --> ClassificationHandler : next
+
+    EnrichmentProviderFactory <|.. StandardEnrichmentFactory
+    EnrichmentProviderFactory <|.. PremiumEnrichmentFactory
+}
+
+package "Incident Lifecycle\n<<State Pattern>>" {
+    class Incident
+    interface IncidentState
+    class NewState
+    class UnderTriageState
+    class ContainmentState
+    class EradicationState
+    class RecoveryState
+    class PostIncidentReviewState
+    class ClosedState
+
+    Incident --> IncidentState : current state
+
+    IncidentState <|.. NewState
+    IncidentState <|.. UnderTriageState
+    IncidentState <|.. ContainmentState
+    IncidentState <|.. EradicationState
+    IncidentState <|.. RecoveryState
+    IncidentState <|.. PostIncidentReviewState
+    IncidentState <|.. ClosedState
+}
+
+package "Response Orchestration\n<<Facade + Strategy + Factory + Decorator + Proxy>>" {
+    class IncidentResponseFacade <<Facade>>
+
+    interface ResponseStrategy <<Strategy>>
+    class AggressiveStrategy
+    class BalancedStrategy
+    class ConservativeStrategy
+    class WatchAndWaitStrategy
+
+    interface ResponseAction
+    class ResponseActionFactory <<Factory Method>>
+
+    class BlockIPAction
+    class IsolateEndpointAction
+    class DisableUserAction
+    class QuarantineFileAction
+    class EscalateAction
+
+    abstract class ResponseActionDecorator <<Decorator>>
+    class AuditLogDecorator
+    class ApprovalGateDecorator
+    class RollbackDecorator
+    class MetricsDecorator
+
+    class ResponseActionProxy <<Proxy>>
+
+    IncidentResponseFacade --> ResponseStrategy
+    IncidentResponseFacade --> ResponseActionFactory
+    IncidentResponseFacade --> ResponseActionProxy
+
+    ResponseStrategy <|.. AggressiveStrategy
+    ResponseStrategy <|.. BalancedStrategy
+    ResponseStrategy <|.. ConservativeStrategy
+    ResponseStrategy <|.. WatchAndWaitStrategy
+
+    ResponseAction <|.. BlockIPAction
+    ResponseAction <|.. IsolateEndpointAction
+    ResponseAction <|.. DisableUserAction
+    ResponseAction <|.. QuarantineFileAction
+    ResponseAction <|.. EscalateAction
+
+    ResponseActionFactory ..> ResponseAction : creates
+
+    ResponseAction <|-- ResponseActionDecorator
+    ResponseActionDecorator <|-- AuditLogDecorator
+    ResponseActionDecorator <|-- ApprovalGateDecorator
+    ResponseActionDecorator <|-- RollbackDecorator
+    ResponseActionDecorator <|-- MetricsDecorator
+
+    ResponseActionProxy ..> ResponseAction : authorizes
+}
+
+package "Threat Intelligence\n<<Adapter + Proxy>>" {
+    interface ThreatIntelProvider
+    class VirusTotalAdapter
+    class MISPAdapter
+    class CustomFeedAdapter
+    class ThreatIntelProxy <<Proxy>>
+
+    ThreatIntelProvider <|.. VirusTotalAdapter
+    ThreatIntelProvider <|.. MISPAdapter
+    ThreatIntelProvider <|.. CustomFeedAdapter
+
+    ThreatIntelProxy --> ThreatIntelProvider : delegates
+}
+
+package "Notification\n<<Abstract Factory>>" {
+    interface NotificationFactory <<Abstract Factory>>
+    class BasicNotificationFactory
+    class EnterpriseNotificationFactory
+
+    interface Notifier
+    class EmailNotifier
+    class SlackNotifier
+    class PagerDutyNotifier
+
+    NotificationFactory <|.. BasicNotificationFactory
+    NotificationFactory <|.. EnterpriseNotificationFactory
+
+    Notifier <|.. EmailNotifier
+    Notifier <|.. SlackNotifier
+    Notifier <|.. PagerDutyNotifier
+}
+
+package "Events\n<<Observer + Singleton>>" {
+    class EventBusPublisher <<Singleton>>
+    interface Observer
+    class DashboardUpdater
+    class AuditLogger
+    class NotificationDispatcher
+    class MetricsCollector
+
+    Observer <|.. DashboardUpdater
+    Observer <|.. AuditLogger
+    Observer <|.. NotificationDispatcher
+    Observer <|.. MetricsCollector
+
+    EventBusPublisher o-- Observer : notifies
+}
+
+package "SOC Dashboard\n<<MVC>>" {
+    class Controller
+    class Model
+    class View
+
+    Controller --> Model : updates
+    Model --> View : renders
+}
+
+AlertNormalizerFactory ..> SingleAlert : produces alert
+SingleAlert --> EnrichmentHandler : processed by
+EnrichmentHandler --> Incident : creates incident
+Incident --> IncidentResponseFacade : handled by
+IncidentResponseFacade --> EventBusPublisher : publishes event
+ThreatIntelHandler --> ThreatIntelProxy : checks reputation
+EventBusPublisher ..> DashboardUpdater : realtime update
+EventBusPublisher ..> AuditLogger : audit log
+EventBusPublisher ..> NotificationDispatcher : notification
+
+@enduml

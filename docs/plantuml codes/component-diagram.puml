@@ -1,0 +1,170 @@
+@startuml SDAPro_Clean_Component_Diagram
+
+!theme plain
+title SDA-Pro — Clean Component Diagram / SOA Architecture
+
+skinparam componentStyle rectangle
+skinparam shadowing true
+skinparam roundcorner 12
+skinparam linetype ortho
+
+left to right direction
+
+actor "SOC Analyst" as Analyst
+actor "Security Engineer" as Engineer
+
+cloud "External Security Sources" {
+    [Splunk Mock] as Splunk
+    [Firewall Mock] as Firewall
+    [CrowdStrike Mock] as CrowdStrike
+    [Cloud SIEM Mock] as CloudSIEM
+}
+
+cloud "Mock External Integrations" {
+    [VirusTotal Mock] as VirusTotal
+    [MISP Mock] as MISP
+    [Slack Mock] as Slack
+    [PagerDuty Mock] as PagerDuty
+    [Email Mock] as Email
+    [Active Directory Mock] as AD
+}
+
+node "SOC Dashboard\nMVC Frontend" {
+    [Views\nReact Screens] as Views
+    [Controllers\nUI Actions] as UIControllers
+    [Models\nDTOs + API Clients] as UIModels
+
+    Views --> UIControllers
+    UIControllers --> UIModels
+}
+
+node "SOA Backend Services" {
+    [Alert Ingestion Service] as AIS
+    [Enrichment & Correlation Service] as ECS
+    [Incident Management Service] as IMS
+    [Response Orchestration Service] as ROS
+    [Threat Intel Service] as TIS
+    [Notification Service] as NS
+    [Audit Service] as AUD
+    [Identity Service] as IDS
+}
+
+node "Event Bus\nRabbitMQ" {
+    queue "Domain Events" as MQ
+}
+
+database "PostgreSQL\n(Relational Storage)" as PostgreSQL
+database "Redis\n(Cache + Sessions)" as Redis
+
+component "Alerts Table" as AlertsTable
+component "Incidents Table" as IncidentsTable
+component "Response Actions Table" as ResponseActionsTable
+component "Audit Logs Table" as AuditLogsTable
+component "Users Table" as UsersTable
+
+component "Threat Intel Cache" as ThreatIntelCache
+component "Session Store" as SessionStore
+component "Rate Limit Counters" as RateLimitCounters
+
+PostgreSQL --> AlertsTable
+PostgreSQL --> IncidentsTable
+PostgreSQL --> ResponseActionsTable
+PostgreSQL --> AuditLogsTable
+PostgreSQL --> UsersTable
+
+Redis --> ThreatIntelCache
+Redis --> SessionStore
+Redis --> RateLimitCounters
+
+Analyst --> Views : monitors incidents
+Engineer --> Views : configures rules
+
+Splunk --> AIS : webhook alert
+Firewall --> AIS : firewall alert
+CrowdStrike --> AIS : endpoint alert
+CloudSIEM --> AIS : polling alert
+
+UIModels --> IDS : auth / profile
+UIModels --> AIS : alerts
+UIModels --> IMS : incidents
+UIModels --> ROS : response actions
+UIModels --> AUD : audit logs
+
+AIS --> ECS : normalized alert
+ECS --> IMS : create incident
+IMS --> ROS : response request
+ROS --> TIS : reputation check
+ROS --> NS : notify analyst
+
+TIS --> VirusTotal : adapter call
+TIS --> MISP : adapter call
+NS --> Slack : notification
+NS --> PagerDuty : escalation
+NS --> Email : email alert
+ROS --> AD : disable user mock
+ROS --> Firewall : block IP mock
+ROS --> CrowdStrike : isolate endpoint mock
+
+AIS --> PostgreSQL : save alerts
+ECS --> PostgreSQL : save enrichment
+IMS --> PostgreSQL : save incidents
+ROS --> PostgreSQL : save response outcomes
+AUD --> PostgreSQL : save audit logs
+IDS --> PostgreSQL : save analysts
+
+TIS --> Redis : cache reputation
+IDS --> Redis : sessions
+
+AIS ..> MQ : AlertIngested
+ECS ..> MQ : AlertEnriched
+IMS ..> MQ : IncidentCreated
+IMS ..> MQ : IncidentStateChanged
+ROS ..> MQ : ResponseActionExecuted
+TIS ..> MQ : ThreatIntelUpdated
+NS ..> MQ : NotificationDispatched
+
+MQ ..> Views : WebSocket / SSE update
+MQ ..> AUD : audit subscriber
+MQ ..> NS : notification subscriber
+
+note right of AIS
+Patterns:
+Singleton
+Factory Method
+Composite
+end note
+
+note right of ECS
+Patterns:
+Chain of Responsibility
+Strategy
+Abstract Factory
+end note
+
+note right of IMS
+Pattern:
+State
+end note
+
+note right of ROS
+Patterns:
+Facade
+Strategy
+Factory Method
+Decorator
+Proxy
+end note
+
+note right of TIS
+Patterns:
+Adapter
+Proxy
+end note
+
+note bottom of MQ
+Event-Driven Architecture
++
+Observer Pattern
+end note
+
+@enduml

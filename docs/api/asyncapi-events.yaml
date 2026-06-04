@@ -1,0 +1,103 @@
+asyncapi: 2.6.0
+info:
+  title: SDA-Pro Domain Events
+  version: 0.1.0
+  description: Event contract for SDA-Pro event-driven architecture.
+servers:
+  rabbitmq:
+    url: localhost:5672
+    protocol: amqp
+channels:
+  sdapro.events.AlertIngested:
+    subscribe:
+      summary: Alert has been normalized and stored
+      message:
+        $ref: "#/components/messages/AlertIngested"
+  sdapro.events.AlertEnriched:
+    subscribe:
+      summary: Alert enrichment completed
+      message:
+        $ref: "#/components/messages/AlertEnriched"
+  sdapro.events.IncidentCreated:
+    subscribe:
+      summary: Incident has been created
+      message:
+        $ref: "#/components/messages/IncidentCreated"
+  sdapro.events.IncidentStateChanged:
+    subscribe:
+      summary: Incident lifecycle state changed
+      message:
+        $ref: "#/components/messages/IncidentStateChanged"
+  sdapro.events.ResponseActionExecuted:
+    subscribe:
+      summary: Response action has completed
+      message:
+        $ref: "#/components/messages/ResponseActionExecuted"
+  sdapro.events.ThreatIntelUpdated:
+    subscribe:
+      summary: Threat intel reputation result updated
+      message:
+        $ref: "#/components/messages/ThreatIntelUpdated"
+  sdapro.events.NotificationDispatched:
+    subscribe:
+      summary: Notification dispatch completed
+      message:
+        $ref: "#/components/messages/NotificationDispatched"
+  sdapro.events.AuditLogCreated:
+    subscribe:
+      summary: Audit log created
+      message:
+        $ref: "#/components/messages/AuditLogCreated"
+components:
+  messages:
+    AlertIngested:
+      payload:
+        $ref: "#/components/schemas/EventEnvelope"
+    AlertEnriched:
+      payload:
+        $ref: "#/components/schemas/EventEnvelope"
+    IncidentCreated:
+      payload:
+        $ref: "#/components/schemas/EventEnvelope"
+    IncidentStateChanged:
+      payload:
+        $ref: "#/components/schemas/EventEnvelope"
+    ResponseActionExecuted:
+      payload:
+        $ref: "#/components/schemas/EventEnvelope"
+    ThreatIntelUpdated:
+      payload:
+        $ref: "#/components/schemas/EventEnvelope"
+    NotificationDispatched:
+      payload:
+        $ref: "#/components/schemas/EventEnvelope"
+    AuditLogCreated:
+      payload:
+        $ref: "#/components/schemas/EventEnvelope"
+  schemas:
+    EventEnvelope:
+      type: object
+      required: [eventType, occurredAt, payload]
+      properties:
+        eventType:
+          type: string
+          enum:
+            - AlertIngested
+            - AlertEnriched
+            - IncidentCreated
+            - IncidentStateChanged
+            - ResponseActionExecuted
+            - ThreatIntelUpdated
+            - NotificationDispatched
+            - AuditLogCreated
+        occurredAt:
+          type: string
+          format: date-time
+        publisher:
+          type: string
+          example: alert-ingestion-service
+        correlationId:
+          type: string
+          format: uuid
+        payload:
+          type: object

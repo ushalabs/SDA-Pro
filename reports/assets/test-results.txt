@@ -1,0 +1,12 @@
+﻿-------------------------------------------------------------------------------
+Test set: edu.sdapro.AuditEventCreationTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.993 s -- in edu.sdapro.AuditEventCreationTest
+-------------------------------------------------------------------------------
+Test set: edu.sdapro.EndToEndDemoTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 33.61 s -- in edu.sdapro.EndToEndDemoTest
+-------------------------------------------------------------------------------
+Test set: edu.sdapro.PatternTests
+-------------------------------------------------------------------------------
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.224 s -- in edu.sdapro.PatternTests

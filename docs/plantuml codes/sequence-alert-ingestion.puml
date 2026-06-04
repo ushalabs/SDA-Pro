@@ -1,0 +1,22 @@
+@startuml
+title Alert Ingestion and Enrichment Flow
+actor Splunk
+participant "Alert Controller" as C
+participant "AlertNormalizerFactory\nFactory Method" as F
+participant "Enrichment Pipeline\nChain of Responsibility" as P
+participant "ThreatIntelProxy\nProxy" as TIP
+participant "VirusTotalAdapter\nAdapter" as VT
+participant "AlertCampaign\nComposite" as COMP
+participant "Incident Service\nState" as I
+participant "EventBusPublisher\nObserver + Singleton" as E
+Splunk -> C : POST /ingest/webhook/splunk
+C -> F : createNormalizer(splunk)
+F --> C : SplunkNormalizer
+C -> P : process(alert)
+P -> TIP : reputation(ip)
+TIP -> VT : mock lookup on cache miss
+P --> C : enriched context
+C -> COMP : add(SingleAlert)
+C -> I : create incident in NEW
+C -> E : publish AlertIngested, AlertEnriched, IncidentCreated
+@enduml

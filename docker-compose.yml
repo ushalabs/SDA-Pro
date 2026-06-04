@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: sdapro
+      POSTGRES_USER: sdapro
+      POSTGRES_PASSWORD: sdapro
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sdapro"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  alert-ingestion-service:
+    build: ./services/alert-ingestion-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/sdapro
+      SPRING_DATASOURCE_USERNAME: sdapro
+      SPRING_DATASOURCE_PASSWORD: sdapro
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_DATA_REDIS_HOST: redis
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+
+  soc-dashboard:
+    build: ./soc-dashboard
+    environment:
+      VITE_API_BASE_URL: http://localhost:8080
+    ports:
+      - "5173:5173"
+    depends_on:
+      - alert-ingestion-service
+
+volumes:
+  pgdata:

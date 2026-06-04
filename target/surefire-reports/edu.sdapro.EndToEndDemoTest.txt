@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: edu.sdapro.EndToEndDemoTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 33.61 s -- in edu.sdapro.EndToEndDemoTest
